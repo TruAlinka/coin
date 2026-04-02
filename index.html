@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Падающая монетка с заданием</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #282c34;
+      color: white;
+      font-family: Arial, sans-serif;
+      user-select: none;
+    }
+    #score {
+      position: fixed;
+      top: 10px;
+      right: 20px;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    #coin {
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      width: 40px;
+      height: 40px;
+      background: radial-gradient(circle at center, gold 60%, orange 90%);
+      border-radius: 50%;
+      cursor: pointer;
+      animation: fall 5s linear infinite;
+      filter: drop-shadow(0 0 3px gold);
+      transform: translateX(-50%);
+    }
+    @keyframes fall {
+      0% {
+        top: -50px;
+        left: calc(10% + 80vw * var(--rand));
+        opacity: 1;
+      }
+      90% {
+        opacity: 1;
+      }
+      100% {
+        top: 100vh;
+        opacity: 0;
+      }
+    }
+    #questionModal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #20232a;
+      border: 2px solid gold;
+      border-radius: 12px;
+      padding: 20px;
+      width: 300px;
+      display: none;
+      z-index: 10;
+    }
+    #questionModal h2 {
+      margin-top: 0;
+      font-size: 18px;
+    }
+    .answer-btn {
+      background: #444;
+      border: none;
+      color: white;
+      padding: 10px;
+      margin: 5px 0;
+      width: 100%;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .answer-btn:hover {
+      background: gold;
+      color: black;
+    }
+    #closeBtn {
+      margin-top: 10px;
+      background: transparent;
+      border: none;
+      color: lightgray;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div id="score">Монеток: 0</div>
+  <div id="coin"></div>
+
+  <div id="questionModal">
+    <h2 id="questionText">...</h2>
+    <div id="answers"></div>
+    <button id="closeBtn">Закрыть</button>
+  </div>
+
+  <script>
+    const coin = document.getElementById('coin');
+    const scoreElem = document.getElementById('score');
+    const modal = document.getElementById('questionModal');
+    const questionText = document.getElementById('questionText');
+    const answersDiv = document.getElementById('answers');
+    const closeBtn = document.getElementById('closeBtn');
+
+    let score = 0;
+    let currentCoinCaught = false;
+
+    // Задания (вопрос + варианты + индекс правильного ответа)
+    const questions = [
+      {
+        question: "Выберите правильный перевод слова 'Cat':",
+        answers: ["Кошка", "Собака", "Птица", "Рыба"],
+        correct: 0
+      },
+      {
+        question: "Переведите слово 'Book':",
+        answers: ["Книга", "Стол", "Дверь", "Окно"],
+        correct: 0
+      },
+      {
+        question: "Выберите правильный перевод 'Happy':",
+        answers: ["Грустный", "Весёлый", "Злой", "Уставший"],
+        correct: 1
+      }
+    ];
+
+    // Каждому падению монетки будет назначаться случайная позиция
+    function setRandomPosition() {
+      const rand = Math.random(); 
+      coin.style.setProperty('--rand', rand);
+      // Чтобы перезапустить анимацию, сбросим и зададим заново
+      coin.style.animation = 'none';
+      coin.offsetHeight; // триггер перерисовки
+      coin.style.animation = 'fall 5s linear forwards';
+      currentCoinCaught = false;
+    }
+
+    // Показать вопрос
+    function showQuestion() {
+      modal.style.display = 'block';
+      // Случайно выбрать вопрос
+      const q = questions[Math.floor(Math.random() * questions.length)];
+      questionText.textContent = q.question;
+
+      // Очистить предыдущие варианты
+      answersDiv.innerHTML = '';
+
+      q.answers.forEach((ans, i) => {
+        const btn = document.createElement('button');
+        btn.textContent = ans;
+        btn.className = 'answer-btn';
+        btn.onclick = () => {
+          if (i === q.correct) {
+            alert('Правильно! Вы получили монетку.');
+            score++;
+            scoreElem.textContent = `Монеток: ${score}`;
+            modal.style.display = 'none';
+            currentCoinCaught = true;
+            setRandomPosition();
+          } else {
+            alert('Неправильно, попробуйте ещё.');
+          }
+        };
+        answersDiv.appendChild(btn);
+      });
+    }
+
+    coin.addEventListener('click', () => {
+      if (!currentCoinCaught) {
+        showQuestion();
+      }
+    });
+
+    closeBtn.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    // При загрузке начнем с рандомной позиции
+    window.onload = () => {
+      setRandomPosition();
+    };
+
+    // Чтобы монетка постоянно падала, после окончания анимации сбрасываем позицию
+    coin.addEventListener('animationend', () => {
+      if (!currentCoinCaught) {
+        setRandomPosition();
+      }
+    });
+  </script>
+</body>
+</html>
