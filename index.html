@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Редактор + Предпросмотр виджета</title>
   <style>
+    /* Стили — как у тебя */
     body {
       margin:0; padding:0;
       font-family: Arial, sans-serif;
@@ -89,11 +90,9 @@
   const generateBtn = document.getElementById('generateBtn');
   const widgetFrame = document.getElementById('widgetFrame');
 
-  // Хранит массив вопросов
   let questions = [];
 
-  // Функция для создания блока одного вопроса с 4 ответами
-  function createQuestionBlock(q = {question:"", answers:["","","",""], correct:0}, index) {
+  function createQuestionBlock(q = {question:"", answers:["","","",""], correct:0}) {
     const block = document.createElement('div');
     block.className = 'question-block';
 
@@ -113,13 +112,11 @@
       <button class="remove-btn" type="button">Удалить вопрос</button>
     `;
 
-    // Удаление вопроса
     block.querySelector('.remove-btn').onclick = () => {
       questionsContainer.removeChild(block);
       refreshQuestionsArray();
     };
 
-    // При любом изменении в блоке обновлять глобальный questions массив
     const inputs = block.querySelectorAll('textarea, input');
     inputs.forEach(inp => {
       inp.addEventListener('input', refreshQuestionsArray);
@@ -128,7 +125,6 @@
     return block;
   }
 
-  // Пересобрать массив questions из DOM
   function refreshQuestionsArray() {
     const blocks = questionsContainer.querySelectorAll('.question-block');
     questions = [];
@@ -137,85 +133,43 @@
       const answerInputs = block.querySelectorAll('.answer-input');
       const answers = Array.from(answerInputs).map(i => i.value.trim());
       let correct = parseInt(block.querySelector('.correct-input').value) - 1;
-      if(isNaN(correct) || correct < 0 || correct > 3) correct = 0;      
+      if(isNaN(correct) || correct < 0 || correct > 3) correct = 0;
       questions.push({question: questionText, answers, correct});
     });
   }
 
-  // Добавить новый вопрос в редактор
   function addQuestion(data) {
     const block = createQuestionBlock(data);
     questionsContainer.appendChild(block);
     refreshQuestionsArray();
   }
 
-  // Генерируем HTML кода игрового виджета с вопросами внутри
   function generateWidgetHTML() {
-    const questionsString = JSON.stringify(questions)
-      .replace(/</g, '\\u003c')
-      .replace(/>/g, '\\u003e')
-      .replace(/&/g, '\\u0026');
+    const qs = JSON.stringify(questions).replace(/</g,'\\u003c');
     return `<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8" />
-<title>Виджет монеток</title>
-<style>
-  html,body {margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;background:transparent;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;user-select:none;position:relative;}
-  #score {position: fixed; top: 15px; right: 20px; font-size:24px; font-weight:700; color:gold; text-shadow:0 0 5px #b58500; pointer-events:none; z-index:50;}
-  #coinsContainer {position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:40;}
-  .coin {position:absolute;width:100px; height:100px; background: radial-gradient(circle at 50% 50%, #fff8b8 40%, #d4af37 85%);
-    border-radius:50%; border:4px solid #b7950b; box-shadow: inset 0 10px 15px rgba(255,255,255,0.7), inset 0 -10px 25px rgba(180,140,25,0.9), 0 0 20px rgba(212,175,55,0.8);
-    filter: drop-shadow(0 0 8px #ffd700); cursor:pointer; user-select:none; animation-timing-function:linear; animation-fill-mode:forwards; transform-origin:center;
-    pointer-events:auto; will-change: transform, top, left; z-index:40; animation-name:fall, spin; animation-duration:8s, 3s; animation-iteration-count:1, infinite;
-    animation-timing-function: linear, linear; 
-  }
-  @keyframes fall {
-    0% {top:-120px; opacity:1;}
-    90% {opacity:1;}
-    100% {top:100vh; opacity:0;}
-  }
-  @keyframes spin {
-    from {transform: translateX(-50%) rotate(0deg);}
-    to {transform: translateX(-50%) rotate(360deg);}
-  }
-  #questionModal {
-    position: fixed; top:50%; left:50%; transform: translate(-50%, -50%); width: 360px; background: rgba(32, 35, 42, 0.95);
-    border: 3px solid gold; border-radius: 16px; padding: 25px 30px; box-shadow: 0 0 20px gold; color: white; display:none; z-index:100;
-  }
-  #questionModal h2 {
-    margin: 0 0 15px 0; font-size: 20px; line-height: 1.3;
-  }
-  .answer-btn {
-    display: block; width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 10px;
-    background: #444851; color: white; font-size: 17px; cursor: pointer; transition: background-color 0.3s, color 0.3s;
-  }
-  .answer-btn:hover {
-    background-color: gold; color: black;
-  }
-  #closeBtn {
-    margin-top: 12px; background: transparent; border: none; color: lightgray;
-    font-size:14px; cursor:pointer; text-decoration: underline; display:block; text-align:center;
-  }
-  #closeBtn:hover {
-    color: gold;
-  }
-</style>
-</head>
-<body>
-
+<html lang="ru"><head><meta charset="UTF-8"><title>Виджет</title><style>
+html,body{margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;background:transparent;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;user-select:none;position:relative;}
+#score{position:fixed;top:15px;right:20px;font-size:24px;font-weight:700;color:gold;text-shadow:0 0 5px #b58500;pointer-events:none;z-index:50;}
+#coinsContainer{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:40;}
+.coin{position:absolute;width:100px;height:100px;background:radial-gradient(circle at 50% 50%, #fff8b8 40%, #d4af37 85%);border-radius:50%;border:4px solid #b7950b;box-shadow:inset 0 10px 15px rgba(255,255,255,0.7),inset 0 -10px 25px rgba(180,140,25,0.9),0 0 20px rgba(212,175,55,0.8);filter:drop-shadow(0 0 8px #ffd700);cursor:pointer;user-select:none;animation-timing-function:linear;animation-fill-mode:forwards;transform-origin:center;pointer-events:auto;will-change:transform,top,left;z-index:40;animation-name:fall,spin;animation-duration:8s,3s;animation-iteration-count:1,infinite;animation-timing-function:linear,linear;}
+@keyframes fall{0%{top:-120px;opacity:1;}90%{opacity:1;}100%{top:100vh;opacity:0;}}
+@keyframes spin{from{transform:translateX(-50%) rotate(0deg);}to{transform:translateX(-50%) rotate(360deg);}}
+#questionModal{position:fixed;top:50%;left:50%;transform:translate(-50%, -50%);width:360px;background:rgba(32,35,42,0.95);border:3px solid gold;border-radius:16px;padding:25px 30px;box-shadow:0 0 20px gold;color:white;display:none;z-index:100;}
+#questionModal h2{margin:0 0 15px 0;font-size:20px;line-height:1.3;}
+.answer-btn{display:block;width:100%;padding:12px;margin:8px 0;border:none;border-radius:10px;background:#444851;color:white;font-size:17px;cursor:pointer;transition:background-color 0.3s,color 0.3s;}
+.answer-btn:hover{background-color:gold;color:black;}
+#closeBtn{margin-top:12px;background:transparent;border:none;color:lightgray;font-size:14px;cursor:pointer;text-decoration:underline;display:block;text-align:center;}
+#closeBtn:hover{color:gold;}
+</style></head><body>
 <div id="score">Монеток: 0</div>
 <div id="coinsContainer"></div>
-
 <div id="questionModal" role="dialog" aria-modal="true" aria-labelledby="questionText">
   <h2 id="questionText">Вопрос</h2>
   <div id="answers"></div>
   <button id="closeBtn">Закрыть</button>
 </div>
-
 <audio id="soundClick" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg" preload="auto"></audio>
 <audio id="soundCorrect" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
-
 <script>
 (() => {
   const coinsContainer = document.getElementById('coinsContainer');
@@ -224,22 +178,15 @@
   const questionText = document.getElementById('questionText');
   const answersDiv = document.getElementById('answers');
   const closeBtn = document.getElementById('closeBtn');
-
   const soundClick = document.getElementById('soundClick');
   const soundCorrect = document.getElementById('soundCorrect');
-
   let score = 0;
-  const questions = ${questionsString};
+  const questions = ${qs};
   const COIN_COUNT = 3;
-
   let activeCoinId = null;
   const coinsState = {};
-
-  function getRandomLeftPercent() {
-    return 10 + Math.random() * 80;
-  }
-
-  function createCoin(id) {
+  function getRandomLeftPercent(){return 10 + Math.random() * 80;}
+  function createCoin(id){
     const coin = document.createElement('div');
     coin.className = 'coin';
     coin.dataset.id = id;
@@ -250,11 +197,8 @@
     coin.style.animationIterationCount = '1, infinite';
     coin.style.animationTimingFunction = 'linear, linear';
     coin.style.transform = 'translateX(-50%) rotate(0deg)';
-
     coin.addEventListener('animationend', () => {
-      if (!coinsState[id].caught && activeCoinId !== id) {
-        resetCoin(id);
-      }
+      if (!coinsState[id].caught && activeCoinId !== id) resetCoin(id);
     });
     coin.addEventListener('click', e => {
       e.stopPropagation();
@@ -264,25 +208,22 @@
       coinsState[id].caught = true;
       showQuestionForCoin(id);
     });
-
     coinsContainer.appendChild(coin);
     coinsState[id] = { element: coin, caught: false };
   }
-
   function resetCoin(id) {
     const coin = coinsState[id].element;
     coinsState[id].caught = false;
     coin.style.left = getRandomLeftPercent() + '%';
     coin.style.top = '-120px';
     coin.style.animation = 'none';
-    coin.offsetHeight; // trigger reflow
+    coin.offsetHeight;
     coin.style.animationName = 'fall, spin';
     coin.style.animationDuration = '8s, 3s';
     coin.style.animationIterationCount = '1, infinite';
     coin.style.animationTimingFunction = 'linear, linear';
     coin.style.opacity = '1';
   }
-
   function showQuestionForCoin(id) {
     if (!questions.length) {
       alert('Нет заданий.');
@@ -314,7 +255,6 @@
     });
     modal.style.display = 'block';
   }
-
   closeBtn.addEventListener('click', () => {
     modal.style.display = 'none';
     if (activeCoinId !== null) {
@@ -322,17 +262,20 @@
       activeCoinId = null;
     }
   });
-
-  function init() {
-    for (let i = 0; i < COIN_COUNT; i++) createCoin(i);
-  }
-
+  function init(){for(let i=0;i<COIN_COUNT;i++)createCoin(i);}
   init();
 })();
 </script>
+</body></html>`;
+  }
 
-</body>
-</html>`;
+  function updatePreview() {
+    const html = generateWidgetHTML();
+    // Очищаем предыдущее содержимое iframe
+    const iframeDoc = widgetFrame.contentDocument || widgetFrame.contentWindow.document;
+    iframeDoc.open();
+    iframeDoc.write(html);
+    iframeDoc.close();
   }
 
   addQuestionBtn.onclick = () => {
@@ -340,13 +283,11 @@
   };
 
   generateBtn.onclick = () => {
-    const html = generateWidgetHTML();
-    widgetFrame.srcdoc = html;
+    updatePreview();
   };
 
   // Старт с одного пустого вопроса
   addQuestion({question:"", answers:["","","",""], correct:0});
-
 })();
 </script>
 
